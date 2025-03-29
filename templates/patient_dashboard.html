@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const patientName = sessionStorage.getItem("patient_name");
+
+            if (!patientName) {
+                alert("You are not logged in!");
+                window.location.href = "/";  
+                return;
+            }
+
+            document.getElementById("welcome").innerText = `Welcome, ${patientName}`;
+
+            fetch(`http://127.0.0.1:5000/patient_dashboard/${encodeURIComponent(patientName)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.records && data.records.length > 0) {
+                        const recordList = document.getElementById("records");
+                        recordList.innerHTML = "";  
+                        data.records.forEach(record => {
+                            const li = document.createElement("li");
+                            li.innerText = `Date: ${record.date}, Prescription: ${record.prescription}`;
+                            recordList.appendChild(li);
+                        });
+                    } else {
+                        document.getElementById("no-records").innerText = "No medical records found.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching records:", error);
+                    document.getElementById("no-records").innerText = "Error loading records.";
+                });
+
+            document.getElementById("upload-form").addEventListener("submit", function(event) {
+                event.preventDefault();
+                
+                const fileInput = document.getElementById("file");
+                if (!fileInput.files.length) {
+                    alert("Please select a file to upload.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+                formData.append("name", patientName);
+
+                fetch("http://127.0.0.1:5000/upload_prescription", { 
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                    if (data.extracted_text) {
+                        document.getElementById("extracted-text").innerText = "Extracted Text: " + data.extracted_text;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error uploading prescription:", error);
+                    alert("Error uploading prescription. Please try again.");
+                });
+            });
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = "/";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 id="welcome">Welcome, Patient</h1>
+
+        <h2>Your Medical Records</h2>
+        <p id="no-records">Loading records...</p>
+        <ul id="records"></ul>
+
+        <h2>Upload Prescription</h2>
+        <form id="upload-form">
+            <input type="file" id="file" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+        <p id="extracted-text"></p>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+</body>
+</html>

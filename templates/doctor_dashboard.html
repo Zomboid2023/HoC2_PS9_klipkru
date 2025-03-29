@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doctor Dashboard</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const doctorName = sessionStorage.getItem("doctor_name");
+            if (!doctorName) {
+                alert("You are not logged in!");
+                window.location.href = "login.html";
+            }
+        });
+
+        async function fetchReports() {
+            const patientName = document.getElementById("patient_name").value;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/patient_dashboard/${patientName}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+
+                if (data.records && data.records.length > 0) {
+                    document.getElementById("reports").innerHTML = data.records.map(report => 
+                        `<li>${JSON.stringify(report)}</li>`).join("");
+                } else {
+                    document.getElementById("reports").innerHTML = "<li>No reports found.</li>";
+                }
+            } catch (error) {
+                console.error("Error fetching reports:", error);
+                alert("Failed to fetch reports.");
+            }
+        }
+
+        async function uploadPrescription() {
+    let fileInput = document.getElementById("prescriptionFile");
+    let doctorName = sessionStorage.getItem("doctor_name");
+    let patientName = document.getElementById("patient_name").value;
+
+    if (!fileInput || !doctorName || !patientName) {
+        alert("Missing required information (doctor name, patient name, or file input).");
+        return;
+    }
+
+    if (fileInput.files.length === 0) {
+        alert("Please select a file before uploading.");
+        return;
+    }
+
+    let file = fileInput.files[0];
+
+    let formData = new FormData();
+    formData.append("file", file);
+    formData.append("doctor_name", doctorName);
+    formData.append("patient_name", patientName);
+
+    try {
+        const response = await fetch("http://127.0.0.1:5000/upload_prescription_doctor", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        console.log("Server Response:", data); // Debugging log
+
+        if (data.message) {
+            alert("Prescription uploaded successfully!");
+        } else if (data.error) {
+            alert("Error uploading prescription: " + data.error);
+        } else {
+            alert("Unexpected response from server.");
+        }
+    } catch (error) {
+        console.error("Error uploading prescription:", error);
+        alert("Failed to upload prescription.");
+    }
+}
+
+
+        async function analyzeInteractions() {
+            const primaryDrug = document.getElementById("primary_drug").value;
+            const secondaryDrugs = document.getElementById("extracted_drugs").innerText.replace("Extracted Drugs: ", "").split(", ");
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/analyze_interactions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ primaryDrug, secondaryDrugs })
+                });
+
+                const data = await response.json();
+                document.getElementById("interaction_results").innerText = data.result;
+            } catch (error) {
+                console.error("Error analyzing drug interactions:", error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Doctor Dashboard</h2>
+
+    <label>Patient Name:</label>
+    <input type="text" id="patient_name">
+    <button onclick="fetchReports()">Fetch Reports</button>
+
+    <h3>Patient Reports</h3>
+    <ul id="reports"></ul>
+
+    <h3>Upload Prescription</h3>
+    <input type="file" id="prescriptionFile" accept=".jpg,.png,.pdf">
+    <button onclick="uploadPrescription()">Upload</button>
+
+    <p id="extracted_drugs"></p>
+
+    <h3>Analyze Drug Interactions</h3>
+    <label>Primary Drug:</label>
+    <input type="text" id="primary_drug">
+    <button onclick="analyzeInteractions()">Check Interaction</button>
+
+    <p id="interaction_results"></p>
+
+    <a href="login.html">Logout</a>
+</body>
+</html>
