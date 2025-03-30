@@ -4,7 +4,7 @@ from datetime import datetime
 
 def log(message):
     """Helper function for logging with timestamps."""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timesatamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] [LOG]: {message}")
 
 def get_patient_records_for_doctor(doctor_name):
