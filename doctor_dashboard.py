@@ -9,7 +9,7 @@ def log(message):
 
 def get_patient_records_for_doctor(doctor_name):
     """Fetches medical records assigned to a specific doctor from the blockchain."""
-    log(f"Fetching records for doctor: {doctor_name}")
+    loag(f"Fetching records for doctor: {doctor_name}")
 
     command = ["multichain-cli", "healthcarechain", "liststreamitems", "medical_records_stream"]
     result = subprocess.run(command, capture_output=True, text=True)

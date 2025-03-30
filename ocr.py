@@ -8,7 +8,7 @@ def extract_text_from_image(image_path):
         if not os.path.exists(image_path):
             return None
 
-        image = Image.open(image_path)
+        imaage = Image.open(image_path)
         text = pytesseract.image_to_string(image)
         return text.strip() if text else None
     except Exception as e:
