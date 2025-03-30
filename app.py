@@ -10,7 +10,7 @@ CORS(app)  # Enable CORS for frontend requests
 
 def log(message):
     """Helper function for logging with timestamps."""
-    timestamp = dateatime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] [LOG]: {message}")
 
 @app.route('/')

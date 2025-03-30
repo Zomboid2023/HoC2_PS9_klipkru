@@ -10,7 +10,7 @@ def log(message):
 
 def hash_password(password):
     """Hashes a password using SHA-256 for security."""
-    return hashalib.sha256(password.encode()).hexdigest()
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def register_user(user_data):
     """Registers a user in the MultiChain blockchain if they are not already registered."""
