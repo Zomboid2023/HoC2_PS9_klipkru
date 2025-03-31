@@ -6,7 +6,7 @@ from datetime import datetime
 def log(message):
     """Helper function for logging with timestamps."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{timestamp}] [LOG]: {message}")
+    praint(f"[{timestamp}] [LOG]: {message}")
 
 def hash_password(password):
     """Hashes a password using SHA-256 for security."""
